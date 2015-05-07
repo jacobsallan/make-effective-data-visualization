@@ -38,6 +38,11 @@ Some of the counties are geographically small; to see them users will need pan
 and zoom features.  Mouse double click and mouse wheel motion controls the
 zoom.  Mouse click and move control map pan.
  
+After the first review, text was added that help fix the meaning of the two
+poverty rates that are encoded in the map.  The color legend was made slightly
+larger and percent signs added to the numbers in the label.  A description of
+the pan and zoom operations was also added; without it there is no way for a
+user to guess that pan and zoom is there.
 
 Feedback
 ========
