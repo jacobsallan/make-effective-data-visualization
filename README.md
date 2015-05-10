@@ -53,9 +53,13 @@ the comment to mean that meaning of the title change was not apparent.
 To emphasize the connection between the title and the graph, I moved 
 the intervening text to the bottom of the display.
 
-The third review also wanted multiple hues in the color scheme.  I resisted
+The third reviewer also wanted multiple hues in the color scheme.  I resisted
 the temptation.
 
+After the third review, map animation was added.
+
+After the fourth review, the instructions on map use were changed to not use
+the word 'mouse'.
 
 Feedback
 ========
