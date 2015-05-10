@@ -2,18 +2,17 @@
  * 
  */
 "use strict";
+
+// Namespace to avoid pollution of the global namespace.
 var povusa = {
     margin : 75,
-    width : 1035 - 75,
-    height : 525 - 75,
     nativeWidth : 1035 - 75,
     nativeHeight : 525 - 75,
-    nativeScale : 1280,
     svg : {},
     map : {},
     states : {},
     counties : {},
-    poverty_data : {},
+    poverty_data : [],
     minRate : 20.0,
     maxRate : 60.0,
     minColor : "orange",
@@ -24,17 +23,29 @@ var povusa = {
     readDone : false
 };
 
+// Map projection.  AlbersUsa is a map projection that treats Alaska and
+// Hawaii as special cases.
 povusa.projection = d3.geo.albersUsa().precision(1);
+
+// Path function for scaling county and state boundaries.
 povusa.path = d3.geo.path().projection(povusa.projection);
+
+// Color scale object used to assign colors to counties based on the county's
+// poverty rate.
 povusa.color = d3.scale.linear().domain([ povusa.minRate, povusa.maxRate ])
         .range([ povusa.minColor, povusa.maxColor ]);
-povusa.tooltip = function() {
-}
 
+// Tooltip object for county annotations.
+povusa.tooltip = function() { }
+
+// Create a county identifier from census data.
 povusa.fipsToId = function(stateFIPS, countyFIPS) {
     return 100 * countyFIPS + stateFIPS;
 };
 
+// Constructor for poverty data objects.  The id field is used to
+// match objects to counties.  The id field is contructed from the
+// FIPS identifiers assigned by the census bureau.
 povusa.PovertyData = function(name, stateFIPS, countyFIPS, mhi, rate0to4,
         rate0to17, rate5to17, rateAll) {
     this.name = name;
@@ -48,30 +59,12 @@ povusa.PovertyData = function(name, stateFIPS, countyFIPS, mhi, rate0to4,
     this.rateAll = rateAll;
 };
 
-function readOldPovertyData(pdata) {
-    var out = {};
-    var pValue = {};
-    for (var i = 0; i < pdata.length; i++) {
-        pValue = pdata[i];
-        var name = pValue["Name"];
-        var mHIncome = pValue.slice(133, 139);
-        var povAge0to4 = pValue.slice(154, 160);
-        var povAge0to17 = pValue.slice(76, 80);
-        var povAge5to17 = pValue.slice(91, 99);
-        var povAgeAll = pValue.slice(34, 38);
-        var stateFips = pValue.slice(0, 2);
-        var countyFips = pValue.slice(3, 6);
-        var obj = new povusa.PovertyData(pdata[i]["Name"], +pValue[stateFips],
-            +pValue[countyFips], mHIncome, +pValue[povAge0to4], +pValue[povAge0to17],
-            +pValue[povAge5to17], +pValue[povAgeAll]);
-        var id = obj["id"];
-        out[id] = obj;
-    }
-    povusa.poverty_data = out;
-};
-
+// Read in the input data from the file specified by pdata.  The
+// poverty data is in eleven distinct CSV files.
+// Populate the object povusa.poverty_data with income and poverty
+// rate data for all US counties.
 function readPovertyData(pdata) {
-    var out = {};
+    var out = [];
     var pValue = {};
     for (var i = 0; i < pdata.length; i++) {
         pValue = pdata[i];
@@ -124,6 +117,8 @@ function readPovertyData(pdata) {
         } else {
             mIncome = pValue[mHIncome];
         }
+        // Create a new PovertyData object, including FIPS attributes hidden from
+        // the user that go into the key "id".  Convert string values to numbers...
         var obj = new povusa.PovertyData(pdata[i]["Name"], +pValue[stateFips],
             +pValue[countyFips], mIncome, +pValue[povAge0to4], +pValue[povAge0to17],
             +pValue[povAge5to17], +pValue[povAgeAll]);
@@ -133,6 +128,8 @@ function readPovertyData(pdata) {
     povusa.poverty_data = out;
 };
 
+// Map update function.  Read in poverty data, reconnect that data to the
+// counties array, and update the overall title.
 function updatePovertyData(pdata) {
     readPovertyData(pdata);
     povusa.updateCounties();
@@ -140,11 +137,10 @@ function updatePovertyData(pdata) {
         "Poverty rate of the United States by county for the year " + povusa.year);
 };
 
-function updateOldPovertyData(pdata) {
-    readOldPovertyData(pdata);
-    povusa.updateCounties();
-};
-
+// Map initialization: Add the colorscale legend using custom SVG.
+// Add a distinct SVG element for the map.  Append two G elements to hold
+// state and county paths.  Enable map zoom and pan.  Place map text below
+// the map.
 povusa.svgsetup = function() {
     var svg1 = d3.select("body").append("svg").attr("width",
         povusa.nativeWidth + povusa.margin).attr("height", "40");
@@ -179,11 +175,14 @@ povusa.svgsetup = function() {
 "poverty is defined in a way that depends on income and family size.  For the definition, refer to").append("a")
         .attr("href","http://www.census.gov/hhes/www/poverty/about/overview/measure.html")
         .text("How the Census Bureau Measures Poverty.");
-
-
-
 };
 
+// Assign a color to a county using the appropriate poverty rate.
+// The input to this call back is a county object with FIPS data for
+// state and county that is mapped to a poverty object id.  The rate
+// is taken from the appropriate poverty data element using the id.
+// The rate is mapped to a color using the povusa.color scale.
+// Missing data is mapped to white.
 povusa.countyFill = function(d) {
     var myId = povusa.fipsToId(+d.properties.STATEFP, +d.properties.COUNTYFP);
     var c = "white";
@@ -196,16 +195,16 @@ povusa.countyFill = function(d) {
     return c;
 };
 
+// Callback to assign a key to each county.
 povusa.county_key = function(d) {
     return povusa.fipsToId(+d.properties.STATEFP,
             +d.properties.COUNTYFP);
 };
 
+// Display a tooltip when the user mouses over a county.
 povusa.mouseOverTooltip = function(d, i) {
     var myId = povusa.fipsToId(+d.properties.STATEFP,
             +d.properties.COUNTYFP);
-    // d is undefined
-    // i is 0
     var mouse = d3.mouse(povusa.svg.node()).map(
         function(d) {
             return parseInt(d);
@@ -227,20 +226,6 @@ povusa.mouseOverTooltip = function(d, i) {
             tooltipText += county.medianHouseholdIncome
                 + "</dd>";
         }
-        // tooltipText += "<dt>Poverty rate (0 to 17):</dt><dd>"
-        // if (isNaN(county.rateAll)) {
-        //    tooltipText = tooltipText + "Missing data</dd>";
-        // } else {
-        //    tooltipText = tooltipText + county.rate0to17;
-        //            + "</dd>";
-        // }
-        // tooltipText += "<dt>Poverty rate (0 to 4):</dt><dd>"
-        // if (isNaN(county.rate0to4)) {
-        //    tooltipText = tooltipText + "Missing data</dd>";
-        // } else {
-        //    tooltipText = tooltipText + county.rate0to4
-        //            + "</dd>";
-        // }
         tooltipText += "<dt>Poverty rate (5 to 17):</dt><dd>"
         if (isNaN(county.rate5to17)) {
             tooltipText = tooltipText + "Missing data</dd>";
@@ -264,6 +249,8 @@ povusa.mouseOverTooltip = function(d, i) {
     }
 };
 
+// Add county boundaries to the map.  This is a callback for d3.json to use.
+// Mouseover event callbacks are assigned to each of the county objects.
 povusa.addCounties = function(cdata) {
     povusa.county_data = cdata;
     povusa.counties
@@ -297,6 +284,7 @@ povusa.addCounties = function(cdata) {
         })
 };
 
+// Add state boundaries to the map.  This is a callback for d3.json to use.
 povusa.addStates = function(state_data) {
     povusa.states.selectAll("path").data(state_data.features).enter().append(
             "path").attr("d", povusa.path).attr("name", function(d) {
@@ -308,17 +296,25 @@ povusa.addStates = function(state_data) {
     });
 };
 
+// Attach poverty data poverty data for the counties to the
+// county objects.
 povusa.updateCounties = function() {
     povusa.counties.selectAll("path").data(
         povusa.county_data.features, povusa.county_key)
         .style("fill", povusa.countyFill);
 }
 
+// Update the map by changing the year.  This is done by changing
+// the povusa.year member used in the title and by reading in the
+// poverty data for all of the counties for the given year.
+// The data input method takes a callback, set to updatePovertyData,
+// that connects the poverty data to the counties in the map.
 function changeYear(yr) {
     povusa.year = yr;
     d3.csv("data/uspov" + povusa.year + ".csv", updatePovertyData);
 };
 
+// Animate by year.
 function animateYears() {
     var ybuttons = document.getElementsByClassName("yearbutton");
     var button = 0;
@@ -341,6 +337,7 @@ function animateYears() {
     }, 1500);
 }
 
+// Change the rate based on user selection.
 function changeRate(rt) {
     povusa.rate = rt;
     povusa.updateCounties();
