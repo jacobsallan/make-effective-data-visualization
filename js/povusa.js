@@ -5,9 +5,9 @@
 var povusa = {
     margin : 75,
     width : 1035 - 75,
-    height : 675 - 75,
+    height : 525 - 75,
     nativeWidth : 1035 - 75,
-    nativeHeight : 675 - 75,
+    nativeHeight : 525 - 75,
     nativeScale : 1280,
     svg : {},
     map : {},
@@ -146,7 +146,6 @@ function updateOldPovertyData(pdata) {
 };
 
 povusa.svgsetup = function() {
-    d3.selectAll(".formp").style("width",povusa.nativeWidth);
     var svg1 = d3.select("body").append("svg").attr("width",
         povusa.nativeWidth + povusa.margin).attr("height", "40");
     // Color scale legend.
@@ -172,6 +171,17 @@ povusa.svgsetup = function() {
     povusa.states = povusa.svg.append("g").attr("class", "state");
     povusa.svg.call(povusa.zoom).call(povusa.zoom.event);
     povusa.tooltip = d3.select("body").append("div").attr("class", "tooltip");
+
+    d3.select("body").append("p").text("The poverty rates when 'All' is selected are the number of persons of low income in a" +
+"county divided by the total population of that county.  The poverty rates when '5 to 17' is selected are" +
+"the number of children in low income families 5 to 17 years old in a county divided by the population of" +
+"that county and age ange.  Poverty is defined on a per family basis.  The definition is complex.  Roughly speaking" +
+"poverty is defined in a way that depends on income and family size.  For the definition, refer to").append("a")
+        .attr("href","http://www.census.gov/hhes/www/poverty/about/overview/measure.html")
+        .text("How the Census Bureau Measures Poverty.");
+
+
+
 };
 
 povusa.countyFill = function(d) {
@@ -310,11 +320,25 @@ function changeYear(yr) {
 };
 
 function animateYears() {
+    var ybuttons = document.getElementsByClassName("yearbutton");
+    var button = 0;
+    for (button = 0; button < ybuttons.length; button++) {
+        ybuttons[button].checked = false;
+        ybuttons[button].disabled = true;
+    }
     var years = ["2003", "2004", "2005", "2006", "2007", "2008","2009", "2010", "2011", "2012", "2013"];
     var i = 0;
-    for (i = 0; i < years.length; i++) {
+    var year_interval = setInterval(function() {
         changeYear(years[i]);
-    }
+        i++;
+        if (i >= years.length) {
+            for (button = 0; button < ybuttons.length; button++) {
+                ybuttons[button].disabled = false;
+            }
+            ybuttons[ybuttons.length - 1].checked = true;
+            clearInterval(year_interval);
+        }
+    }, 1500);
 }
 
 function changeRate(rt) {

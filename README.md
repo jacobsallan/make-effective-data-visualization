@@ -44,10 +44,24 @@ larger and percent signs added to the numbers in the label.  A description of
 the pan and zoom operations was also added; without it there is no way for a
 user to guess that pan and zoom is there.
 
+No changes were made after the second review.  The main takeaway from that
+review was a request to use more than one hue in the graphic.
+
+The third reviewer did not like the title changing with user selections.
+I intended to add animation next and wanted the title to change.  I took
+the comment to mean that meaning of the title change was not apparent.
+To emphasize the connection between the title and the graph, I moved 
+the intervening text to the bottom of the display.
+
+The third review also wanted multiple hues in the color scheme.  I resisted
+the temptation.
+
+
 Feedback
 ========
 
 Reviewer: Ian F.
+----------------
 
 What do you notice in the visualization?
 
@@ -90,6 +104,47 @@ poverty rate is 15.7 for "5-17", does that mean that 15.7% of kids between ages
 live in poverty?  Its hard for me to wrap my head around a poverty rate for an
 age group 5-17, because when I think of poverty, I don't think of kids in
 poverty, I think of families with kids in poverty.
+
+
+Reviewer: Neel K.
+-----------------
+
+What do you notice in the visualization?
+  First thing I notice is the poor choice of colors.  It is
+golden-yellow to black.  I would have preferred more red to blue or
+green.  Second thing I notice is 5-17 demographic is
+disproportionately impacted by poverty.
+
+What questions do you have about the data?
+  Nothing really.  I know that the census department does a good job with data.
+
+What relationships do you notice?
+  I notice how poverty is linked to the economy of the country.  The
+Great Recession has exacerbated poverty rates...
+
+What do you think is the main takeaway from this visualization?
+  1.  Poor pockets seem to persist for a decade, regardless of the
+state of national economy.
+  2.  Poverty impacts kids disproportionately.
+
+Is there something you don’t understand in the graphic?
+  Things seem to be clear...
+
+
+Reviewer: Marie O.
+------------------
+
+1. Suggest to change the title to "Poverty Rate of the United States by County"
+2. May be helpful to show the US overall poverty rate the bar graph is displaying
+   with explicit number
+3. Clever transference of data to display across the state, effective.
+4  To add emphasis, may want to change the color chart to include oranges and reds.
+
+Reviewer: Marie O. (again)
+--------------------------
+The title makes sense with the animation.
+
+The comments to use a mouse are kind of old school.
 
 
 Resources

@@ -10,42 +10,43 @@
 </head>
 <body>
   <h1>Poverty rate of the United States by county for the year 2003</h1>
-  <p class="formp">The poverty rates when 'All' is selected are the number of persons of low income in a
+  <!-- p>The poverty rates when 'All' is selected are the number of persons of low income in a
 county divided by the total population of that county.  The poverty rates when '5 to 17' is selected are
 the number of children in low income families 5 to 17 years old in a county divided by the population of
 that county and age ange.  Poverty is defined on a per family basis.  The definition is complex.  Roughly speaking
 poverty is defined in a way that depends on income and family size.  For the definition, refer to
-<a href="http://www.census.gov/hhes/www/poverty/about/overview/measure.html">How the Census Bureau Measures Poverty.</a></p>
-  <p class="formp">Use a mouse wheel or mouse double click to zoom.  Use a single, held mouse click to pan.</p>
-  <form class="buttons formp" action="/index.html" method="post" enctype="application/x-www-form-urlencoded">
-  <div class="formp">
-  <span class="formdiv">Year:</span>
-  <label>2003<input type="radio" name="grpYear" value="2003" onchange="changeYear('2003')" checked></label>
-  <label>2004<input type="radio" name="grpYear" value="2004" onchange="changeYear('2004')"></label>
-  <label>2005<input type="radio" name="grpYear" value="2005" onchange="changeYear('2005')"></label>
-  <label>2006<input type="radio" name="grpYear" value="2006" onchange="changeYear('2006')"></label>
-  <label>2007<input type="radio" name="grpYear" value="2007" onchange="changeYear('2007')"></label>
-  <label>2008<input type="radio" name="grpYear" value="2008" onchange="changeYear('2008')"></label>
-  <label>2009<input type="radio" name="grpYear" value="2009" onchange="changeYear('2009')"></label>
-  <label>2010<input type="radio" name="grpYear" value="2010" onchange="changeYear('2010')"></label>
-  <label>2011<input type="radio" name="grpYear" value="2011" onchange="changeYear('2011')"></label>
-  <label>2012<input type="radio" name="grpYear" value="2012" onchange="changeYear('2012')"></label>
-  <label>2013<input type="radio" name="grpYear" value="2013" onchange="changeYear('2013')"></label>
-  <!-- input type="radio" name="grpYear" value="animate" onchange="animateYears()">Animate</input -->
+<a href="http://www.census.gov/hhes/www/poverty/about/overview/measure.html">How the Census Bureau Measures Poverty.</a></p -->
+  <form class="buttons" action="/index.html" method="post" enctype="application/x-www-form-urlencoded">
+  <div>
+  <span>Year:</span>
+  <label>2003<input class="yearbutton" type="radio" name="grpYear" value="2003" onchange="changeYear('2003');"></label>
+  <label>2004<input class="yearbutton" type="radio" name="grpYear" value="2004" onchange="changeYear('2004');"></label>
+  <label>2005<input class="yearbutton" type="radio" name="grpYear" value="2005" onchange="changeYear('2005');"></label>
+  <label>2006<input class="yearbutton" type="radio" name="grpYear" value="2006" onchange="changeYear('2006');"></label>
+  <label>2007<input class="yearbutton" type="radio" name="grpYear" value="2007" onchange="changeYear('2007');"></label>
+  <label>2008<input class="yearbutton" type="radio" name="grpYear" value="2008" onchange="changeYear('2008');"></label>
+  <label>2009<input class="yearbutton" type="radio" name="grpYear" value="2009" onchange="changeYear('2009');"></label>
+  <label>2010<input class="yearbutton" type="radio" name="grpYear" value="2010" onchange="changeYear('2010');"></label>
+  <label>2011<input class="yearbutton" type="radio" name="grpYear" value="2011" onchange="changeYear('2011');"></label>
+  <label>2012<input class="yearbutton" type="radio" name="grpYear" value="2012" onchange="changeYear('2012');"></label>
+  <label>2013<input class="yearbutton" type="radio" name="grpYear" value="2013" onchange="changeYear('2013');"></label>
+  <input type="button" value="Animate" onclick="animateYears();"></input>
   </div>
   <div>
-  <span class="formdiv">Poverty Rate Type:</span>
+  <span>Poverty Rate Type:</span>
   <label>All<input type="radio" name="grpType" value="rateAll" checked onchange="changeRate('rateAll')"></label>
   <!-- input type="radio" name="grpType" value="rate0to4" onchange="changeRate('rate0to4')">0 to 4</input -->
   <label>5 to 17<input type="radio" name="grpType" value="rate5to17" onchange="changeRate('rate5to17')"></label>
   <!-- input type="radio" name="grpType" value="rate0to17" onchange="changeRate('rate0to17')">0 to 17</input -->
   </div>
   </form>
+  <p>Use a mouse wheel or mouse double click to zoom.  Use a single, held mouse click to pan.</p>
   <script type="text/javascript">
 povusa.svgsetup();
 d3.csv("data/uspov2003.csv", readPovertyData);
 d3.json("data/cb_2013_us_county_5m.geojson", povusa.addCounties);
 d3.json("data/cb_2013_us_state_5m.geojson", povusa.addStates);
+animateYears();
 </script>
 </body>
 </html>
