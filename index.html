@@ -10,13 +10,11 @@
 </head>
 <body>
   <h1>Poverty rate of the United States by county for the year 2003</h1>
-  <!-- p>The poverty rates when 'All' is selected are the number of persons of low income in a
-county divided by the total population of that county.  The poverty rates when '5 to 17' is selected are
-the number of children in low income families 5 to 17 years old in a county divided by the population of
-that county and age ange.  Poverty is defined on a per family basis.  The definition is complex.  Roughly speaking
-poverty is defined in a way that depends on income and family size.  For the definition, refer to
-<a href="http://www.census.gov/hhes/www/poverty/about/overview/measure.html">How the Census Bureau Measures Poverty.</a></p -->
   <form class="buttons" action="/index.html" method="post" enctype="application/x-www-form-urlencoded">
+  <div>
+  <span>Advance the discussion</span>
+  <input type="button" value="Next" onclick="explainNext();"></input>
+  </div>
   <div>
   <span>Year:</span>
   <input type="button" value="Animate" onclick="animateYears();"></input>
@@ -35,12 +33,12 @@ poverty is defined in a way that depends on income and family size.  For the def
   <div>
   <span>Poverty Rate Type:</span>
   <label>All<input type="radio" name="grpType" value="rateAll" checked onchange="changeRate('rateAll')"></label>
-  <!-- input type="radio" name="grpType" value="rate0to4" onchange="changeRate('rate0to4')">0 to 4</input -->
   <label>5 to 17<input type="radio" name="grpType" value="rate5to17" onchange="changeRate('rate5to17')"></label>
-  <!-- input type="radio" name="grpType" value="rate0to17" onchange="changeRate('rate0to17')">0 to 17</input -->
   </div>
   </form>
+  <div>
   <p>Scroll over the map for more details. Double click to zoom.  Click and hold to pan.</p>
+  </div>
   <script type="text/javascript">
 povusa.svgsetup();
 d3.csv("data/uspov2003.csv", readPovertyData);

@@ -179,3 +179,18 @@ http://bl.ocks.org/mbostock/5577023
 
 "How the Census Bureau Measures Poverty"
 http://www.census.gov/hhes/www/poverty/about/overview/measure.html
+
+"Zoom to Bounding Box"
+http://bl.ocks.org/mbostock/2206529
+
+"Zoom to Bounding Box II"
+http://bl.ocks.org/mbostock/9656675
+
+"How to hide paragraph and make visible with heading click using Javascript"
+http://stackoverflow.com/questions/23851607/how-to-hide-paragraph-and-make-visible-with-heading-click-using-javascript
+
+"Layout Gala"
+http://blog.html.it/layoutgala/
+
+"CSS3 Multiple Columns"
+http://www.w3schools.com/css/css3_multiple_columns.asp

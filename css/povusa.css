@@ -20,6 +20,21 @@
     display: none;
 }
 
+#.twocolparent {
+#    -webkit-column-count: 2;
+#    -moz-column-count: 2;
+#    column-count: 2;
+#}
+
+.maps {
+    float: left;
+    width: 870px;
+}
+
+.commentary {
+    margin-left: 880px;
+}
+
 div.tooltip {
     color: #222;
     background: #fff;

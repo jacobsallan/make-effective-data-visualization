@@ -6,8 +6,8 @@
 // Namespace to avoid pollution of the global namespace.
 var povusa = {
     margin : 75,
-    nativeWidth : 1035 - 75,
-    nativeHeight : 525 - 75,
+    nativeWidth : 870,
+    nativeHeight : 450,
     svg : {},
     map : {},
     states : {},
@@ -20,7 +20,11 @@ var povusa = {
     county_data : {},
     year : 2013,
     rate : "rateAll",
-    readDone : false
+    readDone : false,
+    explainFrame: 0,     // 0 is the full map, 1 is Wayne County and so on.
+    explainFrameCount: 4,
+    commentarydiv: {},
+    nextcommentary: {},
 };
 
 // Map projection.  AlbersUsa is a map projection that treats Alaska and
@@ -40,7 +44,7 @@ povusa.tooltip = function() { }
 
 // Create a county identifier from census data.
 povusa.fipsToId = function(stateFIPS, countyFIPS) {
-    return 100 * countyFIPS + stateFIPS;
+    return "a" + 100 * countyFIPS + stateFIPS;
 };
 
 // Constructor for poverty data objects.  The id field is used to
@@ -142,8 +146,10 @@ function updatePovertyData(pdata) {
 // state and county paths.  Enable map zoom and pan.  Place map text below
 // the map.
 povusa.svgsetup = function() {
-    var svg1 = d3.select("body").append("svg").attr("width",
-        povusa.nativeWidth + povusa.margin).attr("height", "40");
+    var twocoldiv = d3.select("body").append("div").attr("class", "twocolparent");
+    var mapdiv = twocoldiv.append("div").attr("class", "maps");
+    var svg1 = mapdiv.append("svg")
+        .attr("width", povusa.nativeWidth + povusa.margin).attr("height", 40);
     // Color scale legend.
     var defs = svg1.append("defs");
     var lgrad = defs.append("linearGradient").attr("id", "uspovColor");
@@ -159,22 +165,28 @@ povusa.svgsetup = function() {
         .attr("font-size", "14").text(povusa.maxRate + "%");
 
     // SVG element for the map.
-    povusa.svg = d3.select("body").append("svg").attr("width",
+    povusa.svg = mapdiv.append("svg").attr("width",
         povusa.nativeWidth + povusa.margin).attr("height",
-        povusa.nativeHeight + povusa.margin);
+        povusa.nativeHeight + povusa.margin).attr("class", "maps");
 
     povusa.counties = povusa.svg.append("g").attr("class", "county");
     povusa.states = povusa.svg.append("g").attr("class", "state");
     povusa.svg.call(povusa.zoom).call(povusa.zoom.event);
-    povusa.tooltip = d3.select("body").append("div").attr("class", "tooltip");
+    povusa.tooltip = mapdiv.append("div").attr("class", "tooltip");
 
-    d3.select("body").append("p").text("The poverty rates when 'All' is selected are the number of persons of low income in a" +
-"county divided by the total population of that county.  The poverty rates when '5 to 17' is selected are" +
-"the number of children in low income families 5 to 17 years old in a county divided by the population of" +
-"that county and age ange.  Poverty is defined on a per family basis.  The definition is complex.  Roughly speaking" +
-"poverty is defined in a way that depends on income and family size.  For the definition, refer to").append("a")
+    povusa.commentarydiv = twocoldiv
+      .append("div").attr("class", "commentary");
+    povusa.commentarydiv
+      .append("p").text("The poverty rates when 'All' is selected are the number of persons of low income in a " +
+"county divided by the total population of that county.  The poverty rates when '5 to 17' is selected are " +
+"the number of children in low income families 5 to 17 years old in a county divided by the population of " +
+"that county and age ange.  Poverty is defined on a per family basis.  The definition is complex.  Roughly speaking " +
+"poverty is defined in a way that depends on income and family size.  For the definition, refer to ").append("a")
         .attr("href","http://www.census.gov/hhes/www/poverty/about/overview/measure.html")
         .text("How the Census Bureau Measures Poverty.");
+    povusa.nextcommentary = povusa.commentarydiv
+        .append("div").attr("class", "next hidden").append("p")
+        .text("");
 };
 
 // Assign a color to a county using the appropriate poverty rate.
@@ -314,6 +326,89 @@ function changeYear(yr) {
     d3.csv("data/uspov" + povusa.year + ".csv", updatePovertyData);
 };
 
+// Reset the translation and scale so that the full map of the United
+// States is visisble.
+povusa.zoomToUS = function() {
+    var translate = [1, 1];
+    var scale = 1;
+    povusa.states.transition()
+      .duration(2750)
+      .call(povusa.zoom.translate(translate).scale(scale).event);
+    povusa.counties.transition()
+      .duration(2750)
+      .call(povusa.zoom.translate(translate).scale(scale).event);
+};
+
+// Translate and scale 'g' elements so that the map focuses on a
+// particular county.
+povusa.zoomToCounty = function(stateFIP, countyFIP) {
+    var bounds = [];
+    var i = 0;
+    var d;
+    // var d = d3.select("#" + povusa.fipsToId(26,163).toString());
+    for (i = 0; i < povusa.county_data.features.length; i++) {
+        d = povusa.county_data.features[i];
+        if (+d.properties.STATEFP == stateFIP && +d.properties.COUNTYFP == countyFIP) {
+            bounds = povusa.path.bounds(d);
+        }
+    }
+    var dx = bounds[1][0] - bounds[0][0],
+      dy = bounds[1][1] - bounds[0][1],
+      x = (bounds[0][0] + bounds[1][0]) / 2,
+      y = (bounds[0][1] + bounds[1][1]) / 2,
+      scale = .9 / Math.max(dx / povusa.nativeWidth, dy / povusa.nativeHeight),
+      translate = [povusa.nativeWidth / 2 - scale * x, povusa.nativeHeight / 2 - scale * y];
+
+    povusa.states.transition()
+      .duration(750)
+      .call(povusa.zoom.translate(translate).scale(scale).event);
+    povusa.counties.transition()
+      .duration(750)
+      .call(povusa.zoom.translate(translate).scale(scale).event);
+};
+
+function explainNext() {
+    var fipsPair = [[0,0], [26,163], [37, 83], [55, 78]];
+    povusa.explainFrame = (povusa.explainFrame + 1) % povusa.explainFrameCount;
+    if (povusa.explainFrame == 0) {
+        povusa.zoomToUS();
+        povusa.nextcommentary = povusa.commentarydiv.select("div").attr("class","next hidden")
+            .select("p")
+            .text("");
+    }
+    else if (povusa.explainFrame == 1) {
+        povusa.zoomToCounty(fipsPair[povusa.explainFrame][0],fipsPair[povusa.explainFrame][1]);
+        povusa.nextcommentary = povusa.commentarydiv.select("div").attr("class","next")
+            .select("p")
+            .text("Wayne County in Michigan is the county that contains Detroit.  The experience "
+            + "of Wayne County over the decade was a little worse than other urban areas in the US.  "
+            + "The overall poverty rate increased by roughly half, from 16.6% to 25.1%. Most of the "
+            + "decline, in 2009, trailed the start of the recession slightly.  Wayne County's "
+            + "impoverishment was accelerated and deepend by the dip in the fortunes of the automobile "
+            + "manufacturing industry.");
+    }
+    else if (povusa.explainFrame == 2) {
+        povusa.zoomToCounty(fipsPair[povusa.explainFrame][0],fipsPair[povusa.explainFrame][1]);
+        povusa.nextcommentary = povusa.commentarydiv.select("div").attr("class","next")
+            .select("p")
+            .text("Halifax County in North Carolina is a county selected as representative of the south.  "
+            + "In short, the rural and lightly urban counties of the south were hammered.  The overall "
+            + "poverty rate increased by roughly half, from 22.3% to 31.6%.  The recession in the Southern "
+            + "United States, at least for the poor, started before the crash of 2009.  To see this, click "
+            + "the automation button.  To see the breadth of the problem, view the southern United States "
+            + "in the full map.");
+    }
+    else if (povusa.explainFrame == 3) {
+        povusa.zoomToCounty(fipsPair[povusa.explainFrame][0],fipsPair[povusa.explainFrame][1]);
+        povusa.nextcommentary = povusa.commentarydiv.select("div").attr("class","next")
+            .select("p")
+            .text("Poverty on Indian reservations started the period extremely high and ended it sky high.  "
+            + "Menominee County, Wisconsin, is illustrative.  Childhood poverty, in particular, is a problem.  "
+            + "The poverty rate for families with children 5-17 doubled over the 2003-2013 decade.  In 2003, "
+            + "that rate was 26%.  In 2013, the majority of families with such children were impoverished.");
+    }
+};
+
 // Animate by year.
 function animateYears() {
     var ybuttons = document.getElementsByClassName("yearbutton");
@@ -352,3 +447,4 @@ povusa.zoomed = function() {
 
 povusa.zoom = d3.behavior.zoom().scaleExtent([ 1, 10 ]).on("zoom",
     povusa.zoomed);
+
